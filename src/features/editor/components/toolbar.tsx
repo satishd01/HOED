@@ -305,6 +305,19 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
 
       <Separator />
 
+      {/* Page Break */}
+      <ToolButton
+        id="toolbar-page-break"
+        onClick={() => (editor.chain().focus() as any).setPageBreak().run()}
+        title="Insert Page Break"
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 13h-4v4h-2v-4H9v-2h4V7h2v4h4v2zM5 3v18h14V3H5zm12 16H7V5h10v14z" />
+        </svg>
+      </ToolButton>
+
+      <Separator />
+
       {/* Download Options */}
       <div className="relative" ref={menuRef}>
         <button

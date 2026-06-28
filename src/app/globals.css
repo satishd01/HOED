@@ -456,3 +456,36 @@ body {
 .dark .paper-canvas {
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
 }
+
+/* Page Break Extension */
+.tiptap .page-break {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  border-top: 2px dashed var(--color-neutral-300);
+  position: relative;
+  page-break-after: always;
+  break-after: page;
+}
+
+.tiptap .page-break::after {
+  content: "PAGE BREAK";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-primary);
+  padding: 0 10px;
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+@media print {
+  .tiptap .page-break {
+    border: none;
+    margin: 0;
+  }
+  .tiptap .page-break::after {
+    display: none;
+  }
+}

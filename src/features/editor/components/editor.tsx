@@ -15,6 +15,7 @@ import TaskItem from "@tiptap/extension-task-item";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import Link from "@tiptap/extension-link";
+import { PageBreak } from "../extensions/page-break";
 import * as Y from "yjs";
 import { IndexeddbPersistence } from "y-indexeddb";
 import { HocuspocusProvider } from "@hocuspocus/provider";
@@ -156,9 +157,10 @@ export default function CollaborativeEditor({
           openOnClick: false,
           autolink: true,
         }),
+        PageBreak,
       ],
     },
-    [ydoc]
+    [documentId, isReadOnly]
   );
 
   // Get document content as text for AI
