@@ -160,77 +160,68 @@ export default function DocumentEditorPage({
 
   return (
     <div className="flex flex-col h-screen">
-      {/* Top bar */}
-      <header className="h-[var(--header-height)] border-b border-[var(--border-color)] bg-[var(--bg-secondary)] flex items-center px-4 gap-4 shrink-0">
-        {/* Back button */}
-        <button
-          onClick={() => router.push("/documents")}
-          className="p-2 rounded-lg hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] transition-colors"
-          aria-label="Back to documents"
-          id="back-to-documents"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-          </svg>
-        </button>
+      {/* Docs-style Top Navigation */}
+      <header className="h-[var(--header-height)] border-b border-[var(--border-color)] bg-[var(--bg-secondary)] flex items-center justify-between px-4 shrink-0 w-full z-40">
+        <div className="flex items-center gap-4 flex-1">
+          {/* Logo (Back to dashboard) */}
+          <Link href="/documents" title="Back to Documents" className="flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-[var(--color-primary-500)] flex items-center justify-center shadow-sm hover:scale-105 transition-transform">
+              <svg className="w-4.5 h-4.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+              </svg>
+            </div>
+          </Link>
 
-        {/* Title input */}
-        <input
-          id="document-title-input"
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          disabled={isReadOnly}
-          className="flex-1 bg-transparent text-lg font-semibold text-[var(--text-primary)] focus:outline-none placeholder:text-[var(--text-tertiary)] disabled:cursor-not-allowed"
-          placeholder="Untitled Document"
-        />
+          <div className="flex flex-col gap-0.5 max-w-[50%]">
+            <div className="flex items-center gap-2">
+              <input
+                id="document-title-input"
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                disabled={isReadOnly}
+                className="bg-transparent text-lg font-semibold text-[var(--text-primary)] focus:outline-none focus:bg-[var(--bg-tertiary)] hover:bg-[var(--bg-tertiary)] px-2 py-0.5 rounded transition-colors placeholder:text-[var(--text-tertiary)] disabled:cursor-not-allowed max-w-full"
+                placeholder="Untitled Document"
+              />
+              {/* Saving indicator */}
+              {isSavingTitle && (
+                <span className="text-xs text-[var(--text-tertiary)] animate-pulse whitespace-nowrap">
+                  Saving...
+                </span>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-2 px-2 text-[11px] text-[var(--text-secondary)]">
+              <Link href={`/documents/${id}/versions`} className="hover:underline hover:text-[var(--text-primary)] transition-colors">
+                Version history
+              </Link>
+              <span>•</span>
+              <span>{document.currentUserRole}</span>
+            </div>
+          </div>
+        </div>
 
-        {/* Saving indicator */}
-        {isSavingTitle && (
-          <span className="text-xs text-[var(--text-tertiary)] animate-pulse">
-            Saving...
-          </span>
-        )}
+        {/* Right side actions */}
+        <div className="flex items-center gap-4 shrink-0">
+          {/* Share button (owner only) */}
+          {document.currentUserRole === "owner" && (
+            <button
+              id="share-document-btn"
+              onClick={() => setShowShareDialog(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-[var(--bg-primary)] bg-[var(--text-primary)] hover:opacity-90 transition-all shadow-md hover-lift"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+              Share
+            </button>
+          )}
 
-        {/* Role badge */}
-        <span
-          className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-            document.currentUserRole === "owner"
-              ? "bg-[var(--color-primary-500)]/10 text-[var(--color-primary-500)]"
-              : document.currentUserRole === "editor"
-              ? "bg-emerald-500/10 text-emerald-500"
-              : "bg-amber-500/10 text-amber-500"
-          }`}
-        >
-          {document.currentUserRole}
-        </span>
-
-        {/* Version history link */}
-        <button
-          onClick={() => router.push(`/documents/${id}/versions`)}
-          className="p-2 rounded-lg hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] transition-colors"
-          title="Version History"
-          id="version-history-btn"
-          aria-label="Version history"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </button>
-
-        {/* Share button (owner only) */}
-        {document.currentUserRole === "owner" && (
-          <button
-            id="share-document-btn"
-            onClick={() => setShowShareDialog(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 hover:from-[var(--color-primary-600)] hover:to-purple-600 transition-all shadow-md"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-            </svg>
-            Share
-          </button>
-        )}
+          {/* User Avatar */}
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--color-primary-400)] to-purple-400 flex items-center justify-center text-white text-sm font-semibold ml-2 shadow-sm">
+            {session?.user?.name?.charAt(0)?.toUpperCase() || "?"}
+          </div>
+        </div>
       </header>
 
       {/* Editor */}

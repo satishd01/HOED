@@ -5,8 +5,8 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] overflow-hidden relative">
       {/* Background Abstract Shapes */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-gradient-to-br from-[var(--color-primary-500)]/20 to-purple-500/20 rounded-full blur-[100px] animate-float" style={{ animationDuration: '6s' }} />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-gradient-to-tl from-purple-600/10 to-[var(--color-primary-600)]/10 rounded-full blur-[120px] animate-float" style={{ animationDuration: '8s', animationDelay: '2s' }} />
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-gradient-to-br from-[var(--color-primary-500)]/20 to-purple-500/20 rounded-full blur-[100px] animate-float pointer-events-none z-0" style={{ animationDuration: '6s' }} />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-gradient-to-tl from-purple-600/10 to-[var(--color-primary-600)]/10 rounded-full blur-[120px] animate-float pointer-events-none z-0" style={{ animationDuration: '8s', animationDelay: '2s' }} />
 
       {/* Navigation */}
       <nav className="backdrop-blur-xl bg-[var(--bg-primary)]/70 border-b border-[var(--border-color)] fixed top-0 left-0 right-0 z-50">
@@ -63,7 +63,7 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: "300ms" }}>
             <Link
               href="/register"
-              className="px-8 py-4 rounded-2xl text-base font-semibold text-white bg-[var(--text-primary)] hover:bg-[var(--text-secondary)] transition-colors w-full sm:w-auto shadow-xl hover-lift"
+              className="px-8 py-4 rounded-2xl text-base font-bold text-[var(--bg-primary)] bg-[var(--text-primary)] hover:opacity-90 transition-all w-full sm:w-auto shadow-xl hover-lift"
             >
               Start Writing for Free
             </Link>
@@ -124,18 +124,18 @@ export default function HomePage() {
       </section>
 
       {/* Bento Box Features */}
-      <section className="py-24 px-6 relative z-10">
+      <section className="py-32 px-6 relative z-10">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-[var(--text-primary)] mb-4 tracking-tight">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-6xl font-extrabold text-[var(--text-primary)] mb-6 tracking-tight">
               A masterclass in modern editing.
             </h2>
-            <p className="text-lg text-[var(--text-secondary)] max-w-2xl mx-auto">
+            <p className="text-xl text-[var(--text-secondary)] max-w-3xl mx-auto leading-relaxed">
               Every interaction is thoughtfully designed to keep you in flow, powered by an architecture that never misses a beat.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[250px]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 auto-rows-[280px]">
             {/* Offline-First (Spans 2 columns) */}
             <div className="md:col-span-2 p-8 rounded-3xl bg-gradient-to-br from-[var(--bg-secondary)] to-[var(--bg-tertiary)] border border-[var(--border-color)] hover:border-[var(--color-primary-500)]/50 transition-all duration-300 hover-lift group relative overflow-hidden flex flex-col justify-between">
               <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--color-primary-500)]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-[var(--color-primary-500)]/10 transition-colors" />

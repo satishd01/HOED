@@ -100,7 +100,7 @@ export default function AiAssistant({
   }
 
   return (
-    <div className="w-80 border-l border-[var(--border-color)] bg-[var(--bg-secondary)] flex flex-col h-full animate-slide-in">
+    <div className="w-80 shrink-0 shadow-[-10px_0_20px_-5px_rgba(0,0,0,0.1)] border-l border-[var(--border-color)] bg-[var(--bg-secondary)] flex flex-col h-full animate-slide-in z-20">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)]">
         <div className="flex items-center gap-2">
@@ -111,7 +111,7 @@ export default function AiAssistant({
         </div>
         <button
           onClick={onClose}
-          className="p-1 rounded-lg hover:bg-[var(--bg-tertiary)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
+          className="p-1.5 rounded-lg hover:bg-[var(--bg-tertiary)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
           aria-label="Close AI panel"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -122,7 +122,7 @@ export default function AiAssistant({
 
       {/* Actions grid */}
       <div className="p-3 border-b border-[var(--border-color)]">
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           {AI_ACTIONS.map((action) => (
             <button
               key={action.id}
@@ -135,14 +135,14 @@ export default function AiAssistant({
                 }
               }}
               disabled={isStreaming}
-              className={`flex flex-col items-center gap-1 p-3 rounded-xl text-center transition-all duration-200 ${
+              className={`flex flex-col items-center gap-1.5 p-3 rounded-xl text-center transition-all duration-200 ${
                 selectedAction === action.id
-                  ? "bg-[var(--color-primary-500)]/10 border border-[var(--color-primary-500)]/30"
-                  : "bg-[var(--bg-tertiary)] hover:bg-[var(--bg-primary)] border border-transparent"
+                  ? "bg-[var(--color-primary-500)]/10 border border-[var(--color-primary-500)]/40 shadow-sm"
+                  : "bg-[var(--bg-tertiary)] hover:bg-[var(--bg-primary)] border border-transparent shadow-sm hover:shadow-md"
               } disabled:opacity-50`}
             >
-              <span className="text-lg">{action.icon}</span>
-              <span className="text-[10px] font-medium text-[var(--text-primary)]">
+              <span className="text-xl">{action.icon}</span>
+              <span className="text-xs font-medium text-[var(--text-primary)]">
                 {action.label}
               </span>
             </button>

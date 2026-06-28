@@ -10,19 +10,28 @@ import * as schema from "./schema";
 
 const globalForDb = globalThis as unknown as {
   pool: Pool | undefined;
+  poolConnectionString: string | undefined;
 };
 
+const connectionString = process.env.DATABASE_URL;
+
 const pool =
-  globalForDb.pool ??
-  new Pool({
-    connectionString: process.env.DATABASE_URL,
-    max: 10, // Maximum number of connections in the pool
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
-  });
+  globalForDb.pool &&
+  globalForDb.poolConnectionString === connectionString
+    ? globalForDb.pool
+    : new Pool({
+        connectionString,
+        ssl: connectionString?.includes("supabase.co")
+          ? { rejectUnauthorized: false }
+          : undefined,
+        max: 10, // Maximum number of connections in the pool
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 10000,
+      });
 
 if (process.env.NODE_ENV !== "production") {
   globalForDb.pool = pool;
+  globalForDb.poolConnectionString = connectionString;
 }
 
 /**

@@ -94,27 +94,39 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="p-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-[var(--text-primary)]">
-            Documents
-          </h1>
-          <p className="text-[var(--text-secondary)] mt-1">
-            Create, edit, and collaborate on documents in real-time
-          </p>
+    <div className="max-w-5xl mx-auto w-full p-8 pb-24">
+      {/* "Start a new document" gallery */}
+      <div className="bg-[var(--bg-secondary)]/50 rounded-3xl p-8 mb-12 border border-[var(--border-color)]">
+        <h2 className="text-lg font-medium text-[var(--text-primary)] mb-6">Start a new document</h2>
+        <div className="flex gap-6">
+          <button
+            id="create-document-btn"
+            onClick={() => setShowCreateDialog(true)}
+            className="flex flex-col items-center gap-3 hover:-translate-y-1 transition-transform group"
+          >
+            <div className="w-36 h-48 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)] group-hover:border-[var(--color-primary-500)] flex items-center justify-center shadow-sm relative overflow-hidden">
+              {/* Paper line decorations */}
+              <div className="absolute inset-0 p-4 pt-12 flex flex-col gap-2 opacity-10">
+                <div className="h-1 bg-current w-full rounded-full" />
+                <div className="h-1 bg-current w-[80%] rounded-full" />
+                <div className="h-1 bg-current w-[90%] rounded-full" />
+              </div>
+              <div className="w-12 h-12 rounded-full bg-[var(--color-primary-500)]/10 text-[var(--color-primary-500)] flex items-center justify-center z-10 group-hover:bg-[var(--color-primary-500)] group-hover:text-white transition-colors">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+              </div>
+            </div>
+            <span className="text-sm font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">Blank Document</span>
+          </button>
         </div>
-        <button
-          id="create-document-btn"
-          onClick={() => setShowCreateDialog(true)}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-white bg-gradient-to-r from-[var(--color-primary-500)] to-purple-500 hover:from-[var(--color-primary-600)] hover:to-purple-600 transition-all duration-200 shadow-lg shadow-[var(--color-primary-500)]/25 hover-lift"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          New Document
-        </button>
+      </div>
+
+      {/* Recent documents header */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-medium text-[var(--text-primary)]">
+          Recent documents
+        </h2>
       </div>
 
       {/* Loading state */}

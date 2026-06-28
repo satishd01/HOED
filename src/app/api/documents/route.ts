@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth/auth";
 import { DocumentService } from "@/features/documents/services/document-service";
 import { createDocumentSchema } from "@/features/documents/validators/document-schema";
 import { handleApiError, UnauthorizedError } from "@/lib/utils/errors";
+import { checkRateLimit, getClientIp } from "@/lib/utils/rate-limiter";
 
 /**
  * GET /api/documents — List all documents for the authenticated user.
@@ -21,9 +22,19 @@ export async function GET() {
 
 /**
  * POST /api/documents — Create a new document.
+ * Rate limited: 30 documents/min per IP.
  */
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    const { allowed } = checkRateLimit(`create-doc:${ip}`, 30, 60_000);
+    if (!allowed) {
+      return Response.json(
+        { error: { message: "Too many requests. Please slow down.", code: "RATE_LIMITED" } },
+        { status: 429 }
+      );
+    }
+
     const session = await auth();
     if (!session?.user?.id) throw new UnauthorizedError();
 

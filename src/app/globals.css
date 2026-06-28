@@ -63,13 +63,13 @@
 }
 
 .dark {
-  --bg-primary: #09090b;
-  --bg-secondary: #18181b;
-  --bg-tertiary: #27272a;
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #12121a;
+  --bg-tertiary: #1e1e28;
   --text-primary: #fafafa;
   --text-secondary: #a1a1aa;
-  --text-tertiary: #52525b;
-  --border-color: #27272a;
+  --text-tertiary: #6b7280;
+  --border-color: #272733;
 }
 
 /* ─── BASE STYLES ────────────────────────────────────────────────────────── */
@@ -438,4 +438,20 @@ body {
 .focus-ring:focus-visible {
   outline: 2px solid var(--color-primary-500);
   outline-offset: 2px;
+}
+
+/* ─── GOOGLE DOCS STYLE PAPER CANVAS ───────────────────────────────────────── */
+.paper-canvas {
+  background-color: var(--bg-primary);
+  max-width: 816px; /* 8.5 inches at 96 PPI */
+  min-height: 1056px; /* 11 inches */
+  margin: 2rem auto;
+  padding: 6rem 5rem;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.dark .paper-canvas {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
 }

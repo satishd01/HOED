@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
@@ -22,7 +24,6 @@
     "@hocuspocus/server": "^4.3.0",
     "@tiptap/extension-code-block-lowlight": "^3.27.1",
     "@tiptap/extension-collaboration": "^3.27.1",
-    "@tiptap/extension-collaboration-cursor": "^2.26.2",
     "@tiptap/extension-highlight": "^3.27.1",
     "@tiptap/extension-link": "^3.27.1",
     "@tiptap/extension-placeholder": "^3.27.1",
@@ -33,6 +34,7 @@
     "@tiptap/pm": "^3.27.1",
     "@tiptap/react": "^3.27.1",
     "@tiptap/starter-kit": "^3.27.1",
+    "@tiptap/y-tiptap": "^3.0.5",
     "ai": "^7.0.4",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
@@ -60,10 +62,12 @@
     "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^10.0.3",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.9"
   }
 }
