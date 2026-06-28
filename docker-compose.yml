@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: syncscribe-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: syncscribe
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  hocuspocus:
+    build: 
+      context: .
+      dockerfile: Dockerfile.server
+    container_name: syncscribe-ws
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/syncscribe
+      - WS_PORT=1234
+      - NODE_ENV=production
+      # In production, replace this with a secure long random string
+      - AUTH_SECRET=development_secret_key_change_me_in_production
+    ports:
+      - "1234:1234"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:

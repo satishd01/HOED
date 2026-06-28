@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
@@ -231,6 +230,27 @@ body {
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+  display: flex;
+  width: max-content;
+}
+
+@keyframes border-glow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.animate-border-glow {
+  background-size: 200% 200%;
+  animation: border-glow 3s ease infinite;
 }
 
 /* ─── TIPTAP EDITOR ──────────────────────────────────────────────────────── */

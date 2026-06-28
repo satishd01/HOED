@@ -1,0 +1,28 @@
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install dependencies
+COPY package.json package-lock.json ./
+RUN npm ci --legacy-peer-deps
+
+# Copy source
+COPY server/ ./server/
+COPY tsconfig.json ./
+
+# We'll use tsx to run the server in production for simplicity,
+# but in a truly optimized production environment you'd want to compile it.
+# For this setup, tsx is sufficient.
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/server ./server
+
+EXPOSE 1234
+
+# Use tsx to run the server directly
+CMD ["npx", "tsx", "server/index.ts"]
