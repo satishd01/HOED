@@ -72,10 +72,9 @@ export async function POST(req: Request) {
       model: google("gemini-2.0-flash"),
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userMessage }],
-      maxTokens: 2000,
     });
 
-    return result.toDataStreamResponse();
+    return result.toTextStreamResponse();
   } catch (error) {
     return handleApiError(error);
   }

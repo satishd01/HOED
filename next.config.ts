@@ -19,12 +19,6 @@ const nextConfig: NextConfig = {
     // Set to false in production to catch errors early
     ignoreBuildErrors: false,
   },
-
-  // ESLint
-  eslint: {
-    // Don't block builds during development iteration
-    ignoreDuringBuilds: true,
-  },
 };
 
 export default nextConfig;

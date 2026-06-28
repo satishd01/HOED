@@ -31,7 +31,7 @@ export async function registerUser(
     // Validate input
     const parsed = registerSchema.safeParse(rawData);
     if (!parsed.success) {
-      const firstError = parsed.error.errors[0];
+      const firstError = parsed.error.issues[0];
       return { success: false, error: firstError.message };
     }
 
@@ -86,7 +86,7 @@ export async function loginUser(
     // Validate input
     const parsed = loginSchema.safeParse(rawData);
     if (!parsed.success) {
-      const firstError = parsed.error.errors[0];
+      const firstError = parsed.error.issues[0];
       return { success: false, error: firstError.message };
     }
 

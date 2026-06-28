@@ -110,7 +110,6 @@ export default function CollaborativeEditor({
       editable: !isReadOnly,
       extensions: [
         StarterKit.configure({
-          history: false, // Yjs handles undo/redo via collaboration
         }),
         Collaboration.configure({
           document: ydoc,
