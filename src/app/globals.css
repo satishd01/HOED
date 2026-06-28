@@ -489,3 +489,85 @@ body {
     display: none;
   }
 }
+
+/* Live Collaboration Cursors */
+.collaboration-cursor__caret {
+  position: relative;
+  margin-left: -1px;
+  margin-right: -1px;
+  border-left: 2px solid #000;
+  border-right: 2px solid #000;
+  word-break: normal;
+  pointer-events: none;
+}
+
+/* Render the caret over the text */
+.collaboration-cursor__caret::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -2px;
+  right: -2px;
+  background-color: transparent;
+}
+
+.collaboration-cursor__label {
+  position: absolute;
+  top: -1.4em;
+  left: -2px;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  user-select: none;
+  color: white;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  border-bottom-left-radius: 0;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Show the label gracefully on hover or always if preferred. 
+   We will make it show by default but fade out slightly on the parent if needed. 
+   Actually, let's keep it always visible for true multiplayer feel, but add a nice shadow */
+.collaboration-cursor__label {
+  opacity: 1;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.ProseMirror-widget {
+  /* Ensure widgets don't break lines awkwardly */
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Threaded Comments */
+.comment-highlight {
+  background-color: rgba(253, 224, 71, 0.4); /* Tailwind yellow-300 */
+  border-bottom: 2px solid rgba(234, 179, 8, 0.5); /* Tailwind yellow-500 */
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.comment-highlight:hover,
+.comment-highlight.is-active {
+  background-color: rgba(253, 224, 71, 0.8);
+  border-bottom-color: rgba(234, 179, 8, 1);
+}
+
+.dark .comment-highlight {
+  background-color: rgba(202, 138, 4, 0.3); /* Tailwind yellow-600 */
+  border-bottom-color: rgba(202, 138, 4, 0.6);
+}
+
+.dark .comment-highlight:hover,
+.dark .comment-highlight.is-active {
+  background-color: rgba(202, 138, 4, 0.6);
+  border-bottom-color: rgba(202, 138, 4, 1);
+}

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
+import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
 import Collaboration from "@tiptap/extension-collaboration";
 // NOTE: @tiptap/extension-collaboration-cursor@3.0.0 is a mislabeled v2 package that uses
@@ -16,7 +17,10 @@ import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import Link from "@tiptap/extension-link";
 import { PageBreak } from "../extensions/page-break";
+import { LiveCursors } from "../extensions/live-cursors";
+import { Comment } from "../extensions/comment";
 import * as Y from "yjs";
+import { Awareness } from "y-protocols/awareness";
 import { IndexeddbPersistence } from "y-indexeddb";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import { toast } from "sonner";
@@ -24,6 +28,7 @@ import { WS_SERVER_URL } from "@/lib/utils/constants";
 import EditorToolbar from "./toolbar";
 import CollaborationBar from "./collaboration-bar";
 import AiAssistant from "./ai-assistant";
+import CommentSidebar from "./comment-sidebar";
 
 interface CollaborativeEditorProps {
   documentId: string;
@@ -43,10 +48,13 @@ export default function CollaborativeEditor({
     Array<{ name: string; color: string }>
   >([]);
   const [showAiPanel, setShowAiPanel] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [activeCommentId, setActiveCommentId] = useState<string | null>(null);
   const restoreAppliedRef = useRef(false);
 
-  // Create Yjs document — stable across renders
+  // Create Yjs document and Awareness — stable across renders
   const ydoc = useMemo(() => new Y.Doc(), []);
+  const awareness = useMemo(() => new Awareness(ydoc), [ydoc]);
 
   // Hold providers in refs so they are stable but created after mount
   const localProviderRef = useRef<IndexeddbPersistence | null>(null);
@@ -74,6 +82,7 @@ export default function CollaborativeEditor({
       url: WS_SERVER_URL,
       name: documentId,
       document: ydoc,
+      awareness,
       token: async () => {
         const res = await fetch(`/api/documents/${documentId}/collaboration-token`, {
           method: "POST",
@@ -96,8 +105,8 @@ export default function CollaborativeEditor({
       },
     });
 
-    // Broadcast this user's presence for the awareness bar
-    remoteProvider.setAwarenessField("user", { name: userName, color: userColor });
+    // Broadcast this user's presence for the awareness bar and cursors
+    awareness.setLocalStateField("user", { name: userName, color: userColor });
 
     remoteProviderRef.current = remoteProvider;
 
@@ -147,10 +156,69 @@ export default function CollaborativeEditor({
           autolink: true,
         }),
         PageBreak,
+        Comment,
+        LiveCursors.configure({ awareness }),
       ],
     },
-    [documentId, isReadOnly]
+    [documentId, isReadOnly, awareness]
   );
+
+  // Listen for selection changes to track active comment
+  useEffect(() => {
+    if (!editor) return;
+
+    const updateActiveComment = () => {
+      const { state } = editor;
+      let activeId = null;
+
+      state.doc.nodesBetween(state.selection.from, state.selection.to, (node) => {
+        if (node.marks) {
+          const commentMark = node.marks.find((m) => m.type.name === "comment");
+          if (commentMark) {
+            activeId = commentMark.attrs.commentId;
+          }
+        }
+      });
+
+      if (activeId !== activeCommentId) {
+        setActiveCommentId(activeId);
+        if (activeId && !showComments) {
+          setShowComments(true);
+          setShowAiPanel(false);
+        }
+      }
+    };
+
+    editor.on("selectionUpdate", updateActiveComment);
+    return () => {
+      editor.off("selectionUpdate", updateActiveComment);
+    };
+  }, [editor, activeCommentId, showComments]);
+
+  const handleAddComment = useCallback(() => {
+    if (!editor || isReadOnly) return;
+    
+    const commentId = crypto.randomUUID();
+    
+    // Create record in Yjs Map
+    const commentsMap = ydoc.getMap("comments");
+    commentsMap.set(commentId, {
+      id: commentId,
+      content: "", // Initial empty content handled by sidebar input
+      authorName: userName,
+      authorColor: userColor,
+      createdAt: Date.now(),
+      resolved: false,
+      replies: [],
+    });
+
+    // Add mark
+    editor.chain().focus().setComment(commentId).run();
+    
+    setShowComments(true);
+    setShowAiPanel(false);
+    setActiveCommentId(commentId);
+  }, [editor, isReadOnly, ydoc, userName, userColor]);
 
   // Get document content as text for AI
   const getDocumentText = useCallback(() => {
@@ -375,8 +443,29 @@ export default function CollaborativeEditor({
               )}
 
               <button
+                id="toggle-comments-btn"
+                onClick={() => {
+                  setShowComments(!showComments);
+                  if (!showComments) setShowAiPanel(false);
+                }}
+                className={`p-1.5 rounded-lg transition-colors flex items-center gap-1 ${
+                  showComments 
+                    ? "bg-[var(--color-primary-500)]/10 text-[var(--color-primary-500)]" 
+                    : "text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
+                }`}
+                title="Comments"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </button>
+
+              <button
                 id="toggle-ai-panel-btn"
-                onClick={() => setShowAiPanel(!showAiPanel)}
+                onClick={() => {
+                  setShowAiPanel(!showAiPanel);
+                  if (!showAiPanel) setShowComments(false);
+                }}
                 className={`p-1.5 rounded-lg transition-colors ${
                   showAiPanel 
                     ? "bg-[var(--color-primary-500)]/10 text-[var(--color-primary-500)]" 
@@ -391,7 +480,30 @@ export default function CollaborativeEditor({
         </div>
 
         {/* Editor canvas content */}
-        <div className="flex-1 overflow-y-auto w-full custom-scrollbar">
+        <div className="flex-1 overflow-y-auto w-full custom-scrollbar relative">
+          {editor && !isReadOnly && (
+            <BubbleMenu
+              editor={editor}
+              shouldShow={({ editor, state, from, to }: any) => {
+                // Only show if there's an actual selection and it's not empty
+                if (from === to) return false;
+                // Don't show if already inside a comment
+                return !editor.isActive("comment");
+              }}
+              className="flex overflow-hidden border border-[var(--border-color)] shadow-xl rounded-xl bg-[var(--bg-primary)] animate-scale-in"
+            >
+              <button
+                onClick={handleAddComment}
+                className="px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] flex items-center gap-1.5"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                Add Comment
+              </button>
+            </BubbleMenu>
+          )}
+
           <EditorContent
             editor={editor}
             className="paper-canvas prose prose-sm sm:prose-base dark:prose-invert max-w-none focus:outline-none"
@@ -414,6 +526,20 @@ export default function CollaborativeEditor({
           getDocumentText={getDocumentText}
           onInsert={insertAiText}
           onClose={() => setShowAiPanel(false)}
+        />
+      )}
+      
+      {/* Comments Sidebar */}
+      {showComments && (
+        <CommentSidebar
+          editor={editor}
+          ydoc={ydoc}
+          currentUser={{ name: userName, color: userColor }}
+          activeCommentId={activeCommentId}
+          onClose={() => {
+            setShowComments(false);
+            setActiveCommentId(null);
+          }}
         />
       )}
     </div>
