@@ -27,26 +27,45 @@ export default function VersionHistoryPage({
   const [selectedVersion, setSelectedVersion] = useState<Version | null>(null);
 
   useEffect(() => {
-    fetchVersions();
+    let isMounted = true;
+
+    const loadVersions = async () => {
+      try {
+        const res = await fetch(`/api/documents/${id}/versions`);
+        if (!res.ok) throw new Error("Failed to fetch versions");
+        const data = await res.json();
+        if (isMounted) {
+          setVersions(data.versions || []);
+        }
+      } catch {
+        toast.error("Failed to load version history");
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadVersions();
+
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
-  async function fetchVersions() {
-    try {
-      const res = await fetch(`/api/documents/${id}/versions`);
-      if (!res.ok) throw new Error("Failed to fetch versions");
-      const data = await res.json();
-      setVersions(data.versions || []);
-    } catch {
-      toast.error("Failed to load version history");
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  function handleRestore(versionId: string) {
+    if (!confirm("Are you sure you want to restore this version? This will create a new CRDT state from the chosen snapshot.")) return;
 
-  async function handleRestore(versionId: string) {
-    if (!confirm("Are you sure you want to restore this version? This will create new CRDT operations that merge the old content back into the live document.")) return;
+    sessionStorage.setItem(
+      `syncscribe-restore:${id}`,
+      JSON.stringify({
+        documentId: id,
+        versionId,
+        versionLabel: selectedVersion?.label || "Snapshot",
+      })
+    );
 
-    toast.success("Version restoration would be applied via CRDT merge on the editor page. Navigate back to the editor to see the restored content.");
+    toast.success("Restoration queued. Opening the editor now.");
     router.push(`/documents/${id}`);
   }
 

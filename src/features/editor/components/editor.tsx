@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Collaboration from "@tiptap/extension-collaboration";
@@ -15,6 +15,7 @@ import Link from "@tiptap/extension-link";
 import * as Y from "yjs";
 import { IndexeddbPersistence } from "y-indexeddb";
 import { HocuspocusProvider } from "@hocuspocus/provider";
+import { toast } from "sonner";
 import { WS_SERVER_URL } from "@/lib/utils/constants";
 import EditorToolbar from "./toolbar";
 import ConnectionStatus from "./connection-status";
@@ -35,7 +36,6 @@ export default function CollaborativeEditor({
   isReadOnly,
 }: CollaborativeEditorProps) {
   const [isLocalSynced, setIsLocalSynced] = useState(false);
-  const [isRemoteSynced, setIsRemoteSynced] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<
     "connected" | "disconnected" | "connecting"
   >("connecting");
@@ -43,6 +43,7 @@ export default function CollaborativeEditor({
     Array<{ name: string; color: string }>
   >([]);
   const [showAiPanel, setShowAiPanel] = useState(false);
+  const restoreAppliedRef = useRef(false);
 
   // Create Yjs document — stable across renders
   const ydoc = useMemo(() => new Y.Doc(), []);
@@ -62,10 +63,22 @@ export default function CollaborativeEditor({
       url: WS_SERVER_URL,
       name: documentId,
       document: ydoc,
-      token: "auth-token-placeholder", // Will be replaced with real JWT
+      token: async () => {
+        const res = await fetch(`/api/documents/${documentId}/collaboration-token`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch collaboration token");
+        }
+
+        const data = await res.json();
+        return data.token as string;
+      },
       onConnect: () => {
         setConnectionStatus("connected");
-        setIsRemoteSynced(true);
       },
       onDisconnect: () => {
         setConnectionStatus("disconnected");
@@ -164,6 +177,51 @@ export default function CollaborativeEditor({
     },
     [editor, isReadOnly]
   );
+
+  useEffect(() => {
+    if (!editor || !isLocalSynced || restoreAppliedRef.current) {
+      return;
+    }
+
+    const rawRestore = sessionStorage.getItem(`syncscribe-restore:${documentId}`);
+    if (!rawRestore) return;
+
+    const applyRestore = async () => {
+      try {
+        const restoreData = JSON.parse(rawRestore) as {
+          documentId: string;
+          versionId: string;
+          versionLabel: string;
+        };
+
+        if (restoreData.documentId !== documentId || !restoreData.versionId) {
+          return;
+        }
+
+        const res = await fetch(
+          `/api/documents/${documentId}/versions/${restoreData.versionId}/restore`,
+          { cache: "no-store" }
+        );
+        if (!res.ok) throw new Error("Failed to fetch restore snapshot");
+
+        const data = await res.json();
+        const snapshotBase64 = data.version?.yjsSnapshot as string;
+        if (!snapshotBase64) throw new Error("Restore snapshot missing");
+
+        const snapshotBytes = Uint8Array.from(atob(snapshotBase64), (char) => char.charCodeAt(0));
+
+        Y.applyUpdate(ydoc, snapshotBytes);
+        restoreAppliedRef.current = true;
+        sessionStorage.removeItem(`syncscribe-restore:${documentId}`);
+        toast.success(`Restored ${restoreData.versionLabel}`);
+      } catch {
+        sessionStorage.removeItem(`syncscribe-restore:${documentId}`);
+        toast.error("Unable to restore that version");
+      }
+    };
+
+    void applyRestore();
+  }, [documentId, editor, isLocalSynced, ydoc]);
 
   // Show loading state until local sync completes
   if (!isLocalSynced) {

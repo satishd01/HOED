@@ -2,12 +2,13 @@ import {
   Server,
   onAuthenticatePayload,
   onConnectPayload,
+  onDisconnectPayload,
   onStoreDocumentPayload,
   onLoadDocumentPayload,
 } from "@hocuspocus/server";
-import { Database } from "@hocuspocus/extension-database";
 import { Pool } from "pg";
 import * as jwt from "jsonwebtoken";
+import * as Y from "yjs";
 
 /**
  * Hocuspocus WebSocket Server for real-time document collaboration.
@@ -30,52 +31,57 @@ const MAX_PAYLOAD_SIZE = 5 * 1024 * 1024; // 5MB
 const server = new Server({
   port: parseInt(process.env.WS_PORT || "1234"),
 
-  async onAuthenticate(data: onAuthenticatePayload) {
+  async onAuthenticate(
+    data: onAuthenticatePayload,
+    setContext?: (context: Record<string, unknown>) => void
+  ) {
     const { token, documentName } = data;
 
-    // In production, verify JWT token here
-    // For development, allow all connections
-    if (process.env.NODE_ENV === "production" && token) {
-      try {
-        const decoded = jwt.verify(token, process.env.AUTH_SECRET!) as {
-          id: string;
-          email: string;
-        };
-
-        // Check user has access to this document
-        const result = await pool.query(
-          `SELECT dc.role FROM document_collaborators dc
-           WHERE dc.document_id = $1 AND dc.user_id = $2
-           UNION
-           SELECT 'owner' as role FROM documents
-           WHERE id = $1 AND owner_id = $2`,
-          [documentName, decoded.id]
-        );
-
-        if (result.rows.length === 0) {
-          throw new Error("Access denied");
-        }
-
-        const role = result.rows[0].role;
-
-        return {
-          user: {
-            id: decoded.id,
-            role,
-          },
-        };
-      } catch (error) {
-        throw new Error("Authentication failed");
+    try {
+      const secret = process.env.AUTH_SECRET;
+      if (!secret) {
+        throw new Error("AUTH_SECRET is not configured");
       }
-    }
 
-    // Development mode: allow all
-    return {
-      user: {
-        id: "dev-user",
-        role: "editor",
-      },
-    };
+      const decoded = jwt.verify(token, secret) as {
+        userId: string;
+        documentId: string;
+      };
+
+      if (!decoded?.userId || !decoded?.documentId || decoded.documentId !== documentName) {
+        throw new Error("Access denied");
+      }
+
+      const result = await pool.query(
+        `SELECT role FROM (
+          SELECT 'owner'::text AS role
+          FROM documents
+          WHERE id = $1 AND owner_id = $2 AND is_deleted = false
+          UNION
+          SELECT dc.role
+          FROM document_collaborators dc
+          WHERE dc.document_id = $1 AND dc.user_id = $2
+        ) access
+        LIMIT 1`,
+        [documentName, decoded.userId]
+      );
+
+      if (result.rows.length === 0) {
+        throw new Error("Access denied");
+      }
+
+      const role = result.rows[0].role as "owner" | "editor" | "viewer";
+
+      data.connectionConfig.readOnly = role === "viewer";
+      data.connectionConfig.isAuthenticated = true;
+      setContext?.({
+        userId: decoded.userId,
+        documentId: decoded.documentId,
+        role,
+      });
+    } catch {
+      throw new Error("Authentication failed");
+    }
   },
 
   async onConnect(data: onConnectPayload) {
@@ -84,7 +90,7 @@ const server = new Server({
     );
   },
 
-  async onDisconnect(data: any) { // using any since onDisconnectPayload might not be exported or we don't strictly need it here
+  async onDisconnect(data: onDisconnectPayload) {
     console.log(
       `[Hocuspocus] Client disconnected from document: ${data.documentName}`
     );
@@ -95,9 +101,7 @@ const server = new Server({
 
     try {
       // Get the full document state as a binary buffer
-      const state = Buffer.from(
-        require("yjs").encodeStateAsUpdate(document)
-      );
+      const state = Buffer.from(Y.encodeStateAsUpdate(document));
 
       // Enforce size limit
       if (state.length > MAX_PAYLOAD_SIZE) {
@@ -141,7 +145,6 @@ const server = new Server({
           return;
         }
 
-        const Y = require("yjs");
         Y.applyUpdate(document, new Uint8Array(state));
 
         console.log(
