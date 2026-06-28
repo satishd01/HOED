@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -27,11 +27,7 @@ export default function DocumentsPage() {
   const [newTitle, setNewTitle] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
-  useEffect(() => {
-    fetchDocuments();
-  }, []);
-
-  async function fetchDocuments() {
+  const fetchDocuments = useCallback(async () => {
     try {
       const res = await fetch("/api/documents");
       if (!res.ok) throw new Error("Failed to fetch documents");
@@ -42,7 +38,12 @@ export default function DocumentsPage() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchDocuments();
+  }, [fetchDocuments]);
 
   async function handleCreate() {
     if (!newTitle.trim()) return;

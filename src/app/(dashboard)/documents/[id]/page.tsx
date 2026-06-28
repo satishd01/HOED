@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState, useCallback } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -56,11 +56,7 @@ export default function DocumentEditorPage({
   const [shareRole, setShareRole] = useState<"editor" | "viewer">("editor");
   const [isSharing, setIsSharing] = useState(false);
 
-  useEffect(() => {
-    fetchDocument();
-  }, [id]);
-
-  async function fetchDocument() {
+  const fetchDocument = useCallback(async () => {
     try {
       const res = await fetch(`/api/documents/${id}`);
       if (!res.ok) {
@@ -80,7 +76,12 @@ export default function DocumentEditorPage({
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [id, router]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchDocument();
+  }, [fetchDocument]);
 
   // Debounced title save
   const saveTitle = useCallback(

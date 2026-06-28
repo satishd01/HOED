@@ -22,7 +22,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
     const versions = await VersionService.getVersions(id, session.user.id);
 
     // Strip binary data from list response — only send previews, not full Yjs state
-    const sanitizedVersions = versions.map(({ yjsSnapshot, ...rest }) => rest);
+    const sanitizedVersions = versions.map(({ yjsSnapshot: _yjsSnapshot, ...rest }) => rest);
     return Response.json({ versions: sanitizedVersions });
   } catch (error) {
     return handleApiError(error);

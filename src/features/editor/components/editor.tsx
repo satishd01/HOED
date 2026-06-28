@@ -22,7 +22,6 @@ import { HocuspocusProvider } from "@hocuspocus/provider";
 import { toast } from "sonner";
 import { WS_SERVER_URL } from "@/lib/utils/constants";
 import EditorToolbar from "./toolbar";
-import ConnectionStatus from "./connection-status";
 import CollaborationBar from "./collaboration-bar";
 import AiAssistant from "./ai-assistant";
 
@@ -40,9 +39,6 @@ export default function CollaborativeEditor({
   isReadOnly,
 }: CollaborativeEditorProps) {
   const [isLocalSynced, setIsLocalSynced] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<
-    "connected" | "disconnected" | "connecting"
-  >("connecting");
   const [connectedUsers, setConnectedUsers] = useState<
     Array<{ name: string; color: string }>
   >([]);

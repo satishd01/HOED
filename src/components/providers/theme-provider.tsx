@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 type Theme = "light" | "dark" | "system";
 
@@ -20,31 +20,31 @@ export function useTheme() {
   return useContext(ThemeContext);
 }
 
+function getInitialTheme(): Theme {
+  if (typeof window === "undefined") return "dark";
+  return (localStorage.getItem("theme") as Theme) || "dark";
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("dark");
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
-  useEffect(() => {
-    const stored = localStorage.getItem("theme") as Theme;
-    if (stored) setTheme(stored);
-  }, []);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    let resolved: "light" | "dark";
-
+  // Derive resolvedTheme without state — no setState inside effects
+  const resolvedTheme = useMemo<"light" | "dark">(() => {
     if (theme === "system") {
-      resolved = window.matchMedia("(prefers-color-scheme: dark)").matches
+      if (typeof window === "undefined") return "dark";
+      return window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
         : "light";
-    } else {
-      resolved = theme;
     }
-
-    setResolvedTheme(resolved);
-    root.classList.toggle("dark", resolved === "dark");
-    localStorage.setItem("theme", theme);
+    return theme;
   }, [theme]);
+
+  // Side-effect: apply class to DOM and persist preference
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle("dark", resolvedTheme === "dark");
+    localStorage.setItem("theme", theme);
+  }, [theme, resolvedTheme]);
 
   return (
     <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme }}>

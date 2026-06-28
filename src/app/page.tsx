@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 
 export default function HomePage() {
   return (
@@ -128,7 +127,7 @@ export default function HomePage() {
                     </div>
 
                     <p className="text-[var(--text-secondary)] text-base md:text-lg leading-relaxed">
-                      We're entering a pivotal phase for Project Phoenix. This document outlines our strategic objectives, key deliverables, and team allocations for the upcoming quarter.
+                      We&apos;re entering a pivotal phase for Project Phoenix. This document outlines our strategic objectives, key deliverables, and team allocations for the upcoming quarter.
                     </p>
 
                     <h2 className="text-xl md:text-2xl font-semibold text-[var(--text-primary)] mt-8 mb-4">1. Core Objectives</h2>
@@ -194,7 +193,7 @@ export default function HomePage() {
               <div className="z-10 relative">
                 <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-3">Local-First Architecture</h3>
                 <p className="text-[var(--text-secondary)] text-lg max-w-md leading-relaxed">
-                  Zero loading spinners. Your documents load instantly from IndexedDB. Edit entirely offline, and we'll invisibly sync when you reconnect.
+                  Zero loading spinners. Your documents load instantly from IndexedDB. Edit entirely offline, and we&apos;ll invisibly sync when you reconnect.
                 </p>
               </div>
             </div>

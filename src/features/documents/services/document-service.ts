@@ -1,9 +1,8 @@
-import { eq, and, or, desc } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   documents,
   documentCollaborators,
-  documentVersions,
   users,
   type DocumentRole,
 } from "@/lib/db/schema";

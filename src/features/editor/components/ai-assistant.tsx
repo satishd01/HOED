@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useCompletion } from "@ai-sdk/react";
 
 interface AiAssistantProps {
   documentId: string;
@@ -22,11 +21,10 @@ const AI_ACTIONS: Array<{ id: AiAction; label: string; icon: string; description
 ];
 
 export default function AiAssistant({
-  documentId,
   getDocumentText,
   onInsert,
   onClose,
-}: AiAssistantProps) {
+}: Omit<AiAssistantProps, "documentId">) {
   const [selectedAction, setSelectedAction] = useState<AiAction | null>(null);
   const [customPrompt, setCustomPrompt] = useState("");
   const [translateLang, setTranslateLang] = useState("Spanish");
@@ -93,6 +91,7 @@ export default function AiAssistant({
         }
       }
     } catch (error) {
+      console.error(error);
       setResult("Failed to generate response. Please check your AI API key and try again.");
     } finally {
       setIsStreaming(false);
