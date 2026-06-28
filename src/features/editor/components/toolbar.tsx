@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
+
 import type { Editor } from "@tiptap/react";
 
 interface EditorToolbarProps {
@@ -40,6 +42,52 @@ const Separator = () => (
 );
 
 export default function EditorToolbar({ editor }: EditorToolbarProps) {
+  const [showDownloadMenu, setShowDownloadMenu] = useState(false);
+  const [showStyleMenu, setShowStyleMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const styleMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowDownloadMenu(false);
+      }
+      if (styleMenuRef.current && !styleMenuRef.current.contains(event.target as Node)) {
+        setShowStyleMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleDownload = (format: "html" | "txt") => {
+    let content = "";
+    let mimeType = "";
+    let extension = "";
+
+    if (format === "html") {
+      content = editor.getHTML();
+      mimeType = "text/html";
+      extension = "html";
+    } else if (format === "txt") {
+      content = editor.getText();
+      mimeType = "text/plain";
+      extension = "txt";
+    }
+
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `document.${extension}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setShowDownloadMenu(false);
+  };
+
   return (
     <div className="flex items-center gap-0.5 px-4 py-2 border-b border-[var(--border-color)] bg-[var(--bg-secondary)] overflow-x-auto flex-wrap" role="toolbar" aria-label="Text formatting">
       {/* Text formatting */}
@@ -90,33 +138,53 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
 
       <Separator />
 
-      {/* Headings */}
-      <ToolButton
-        id="toolbar-h1"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-        isActive={editor.isActive("heading", { level: 1 })}
-        title="Heading 1"
-      >
-        <span className="text-xs font-bold">H1</span>
-      </ToolButton>
+      {/* Text Styles Dropdown */}
+      <div className="relative" ref={styleMenuRef}>
+        <button
+          onClick={() => setShowStyleMenu(!showStyleMenu)}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-150 text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] text-sm font-medium min-w-[120px] justify-between border border-transparent hover:border-[var(--border-color)]"
+          title="Text Styles"
+        >
+          <span className="truncate">
+            {editor.isActive("heading", { level: 1 }) ? "Heading 1" : 
+             editor.isActive("heading", { level: 2 }) ? "Heading 2" : 
+             editor.isActive("heading", { level: 3 }) ? "Heading 3" : 
+             "Normal text"}
+          </span>
+          <svg className={`w-3 h-3 transition-transform ${showStyleMenu ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
 
-      <ToolButton
-        id="toolbar-h2"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        isActive={editor.isActive("heading", { level: 2 })}
-        title="Heading 2"
-      >
-        <span className="text-xs font-bold">H2</span>
-      </ToolButton>
-
-      <ToolButton
-        id="toolbar-h3"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        isActive={editor.isActive("heading", { level: 3 })}
-        title="Heading 3"
-      >
-        <span className="text-xs font-bold">H3</span>
-      </ToolButton>
+        {showStyleMenu && (
+          <div className="absolute top-full left-0 mt-1 w-48 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl shadow-lg z-50 py-1 flex flex-col animate-scale-in">
+            <button
+              onClick={() => { editor.chain().focus().setParagraph().run(); setShowStyleMenu(false); }}
+              className={`px-4 py-2 text-sm text-left ${editor.isActive("paragraph") ? 'bg-[var(--color-primary-500)]/10 text-[var(--color-primary-500)] font-semibold' : 'text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]'}`}
+            >
+              Normal text
+            </button>
+            <button
+              onClick={() => { editor.chain().focus().toggleHeading({ level: 1 }).run(); setShowStyleMenu(false); }}
+              className={`px-4 py-2 text-xl font-bold text-left ${editor.isActive("heading", { level: 1 }) ? 'bg-[var(--color-primary-500)]/10 text-[var(--color-primary-500)]' : 'text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]'}`}
+            >
+              Heading 1
+            </button>
+            <button
+              onClick={() => { editor.chain().focus().toggleHeading({ level: 2 }).run(); setShowStyleMenu(false); }}
+              className={`px-4 py-2 text-lg font-bold text-left ${editor.isActive("heading", { level: 2 }) ? 'bg-[var(--color-primary-500)]/10 text-[var(--color-primary-500)]' : 'text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]'}`}
+            >
+              Heading 2
+            </button>
+            <button
+              onClick={() => { editor.chain().focus().toggleHeading({ level: 3 }).run(); setShowStyleMenu(false); }}
+              className={`px-4 py-2 text-base font-bold text-left ${editor.isActive("heading", { level: 3 }) ? 'bg-[var(--color-primary-500)]/10 text-[var(--color-primary-500)]' : 'text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]'}`}
+            >
+              Heading 3
+            </button>
+          </div>
+        )}
+      </div>
 
       <Separator />
 
@@ -234,6 +302,51 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
       >
         <svg className="w-4 h-4" viewBox="0 0 24 24"><path d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.05-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z" fill="currentColor"/></svg>
       </ToolButton>
+
+      <Separator />
+
+      {/* Download Options */}
+      <div className="relative" ref={menuRef}>
+        <button
+          onClick={() => setShowDownloadMenu(!showDownloadMenu)}
+          className="flex items-center gap-1 p-2 rounded-lg transition-all duration-150 text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] text-sm font-medium"
+          title="Download Document"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <svg className={`w-3 h-3 transition-transform ${showDownloadMenu ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {showDownloadMenu && (
+          <div className="absolute top-full right-0 mt-1 w-40 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl shadow-lg z-50 py-1 flex flex-col animate-scale-in origin-top-right">
+            <button
+              onClick={() => handleDownload("html")}
+              className="px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] text-left flex items-center gap-2"
+            >
+              <span className="font-semibold text-[var(--color-primary-500)]">HTML</span> Web Page
+            </button>
+            <button
+              onClick={() => handleDownload("txt")}
+              className="px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] text-left flex items-center gap-2"
+            >
+              <span className="font-semibold text-gray-500">TXT</span> Plain Text
+            </button>
+            <div className="h-px bg-[var(--border-color)] my-1" />
+            <button
+              onClick={() => {
+                window.print();
+                setShowDownloadMenu(false);
+              }}
+              className="px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] text-left flex items-center gap-2"
+            >
+              <span className="font-semibold text-red-500">PDF</span> Print / Save
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
