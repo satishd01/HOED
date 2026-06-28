@@ -1,6 +1,6 @@
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { documents, documentVersions } from "@/lib/db/schema";
+import { documentVersions } from "@/lib/db/schema";
 import { NotFoundError, ForbiddenError } from "@/lib/utils/errors";
 import { DocumentService } from "@/features/documents/services/document-service";
 

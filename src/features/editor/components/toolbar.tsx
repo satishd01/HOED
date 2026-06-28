@@ -6,40 +6,40 @@ interface EditorToolbarProps {
   editor: Editor;
 }
 
+const ToolButton = ({
+  onClick,
+  isActive = false,
+  children,
+  title,
+  id,
+}: {
+  onClick: () => void;
+  isActive?: boolean;
+  children: React.ReactNode;
+  title: string;
+  id: string;
+}) => (
+  <button
+    id={id}
+    onClick={onClick}
+    title={title}
+    className={`p-2 rounded-lg transition-all duration-150 ${
+      isActive
+        ? "bg-[var(--color-primary-500)]/15 text-[var(--color-primary-500)]"
+        : "text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
+    }`}
+    aria-label={title}
+    aria-pressed={isActive}
+  >
+    {children}
+  </button>
+);
+
+const Separator = () => (
+  <div className="w-px h-5 bg-[var(--border-color)] mx-1" />
+);
+
 export default function EditorToolbar({ editor }: EditorToolbarProps) {
-  const ToolButton = ({
-    onClick,
-    isActive = false,
-    children,
-    title,
-    id,
-  }: {
-    onClick: () => void;
-    isActive?: boolean;
-    children: React.ReactNode;
-    title: string;
-    id: string;
-  }) => (
-    <button
-      id={id}
-      onClick={onClick}
-      title={title}
-      className={`p-2 rounded-lg transition-all duration-150 ${
-        isActive
-          ? "bg-[var(--color-primary-500)]/15 text-[var(--color-primary-500)]"
-          : "text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
-      }`}
-      aria-label={title}
-      aria-pressed={isActive}
-    >
-      {children}
-    </button>
-  );
-
-  const Separator = () => (
-    <div className="w-px h-5 bg-[var(--border-color)] mx-1" />
-  );
-
   return (
     <div className="flex items-center gap-0.5 px-4 py-2 border-b border-[var(--border-color)] bg-[var(--bg-secondary)] overflow-x-auto flex-wrap" role="toolbar" aria-label="Text formatting">
       {/* Text formatting */}

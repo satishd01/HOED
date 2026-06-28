@@ -49,7 +49,7 @@ export default function LoginPage() {
             </svg>
           </div>
         </div>
-        <h1 className="text-2xl font-bold gradient-text">SyncScribe</h1>
+        <h1 className="text-2xl font-bold gradient-text">SyncForge</h1>
         <p className="text-[var(--text-secondary)] text-sm mt-1">
           Sign in to your account
         </p>

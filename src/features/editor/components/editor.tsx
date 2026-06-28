@@ -58,7 +58,7 @@ export default function CollaborativeEditor({
   // Create providers after mount — avoids setState-before-mount warning
   useEffect(() => {
     // IndexedDB persistence — loads document from local cache instantly
-    const localProvider = new IndexeddbPersistence(`syncscribe-${documentId}`, ydoc);
+    const localProvider = new IndexeddbPersistence(`syncforge-${documentId}`, ydoc);
 
     // Safety timeout: if 'synced' never fires (new document or IDB unavailable),
     // unblock the editor after 2 seconds rather than hanging forever.
@@ -132,6 +132,7 @@ export default function CollaborativeEditor({
       extensions: [
         StarterKit.configure({
           // Yjs handles undo/redo via its own UndoManager — disable StarterKit's history
+          // @ts-expect-error - history is a valid option but missing from StarterKitOptions type
           history: false,
         }),
         Collaboration.configure({
@@ -273,7 +274,7 @@ export default function CollaborativeEditor({
       return;
     }
 
-    const rawRestore = sessionStorage.getItem(`syncscribe-restore:${documentId}`);
+    const rawRestore = sessionStorage.getItem(`syncforge-restore:${documentId}`);
     if (!rawRestore) return;
 
     const applyRestore = async () => {
@@ -302,10 +303,10 @@ export default function CollaborativeEditor({
 
         Y.applyUpdate(ydoc, snapshotBytes);
         restoreAppliedRef.current = true;
-        sessionStorage.removeItem(`syncscribe-restore:${documentId}`);
+        sessionStorage.removeItem(`syncforge-restore:${documentId}`);
         toast.success(`Restored ${restoreData.versionLabel}`);
       } catch {
-        sessionStorage.removeItem(`syncscribe-restore:${documentId}`);
+        sessionStorage.removeItem(`syncforge-restore:${documentId}`);
         toast.error("Unable to restore that version");
       }
     };
@@ -337,7 +338,6 @@ export default function CollaborativeEditor({
           </div>
           
           <div className="flex items-center gap-3 pl-4 border-l border-[var(--border-color)] shrink-0">
-            <ConnectionStatus status={connectionStatus} />
             <CollaborationBar users={connectedUsers} />
             
             <div className="flex items-center gap-2">

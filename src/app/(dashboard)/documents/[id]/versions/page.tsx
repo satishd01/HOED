@@ -57,7 +57,7 @@ export default function VersionHistoryPage({
     if (!confirm("Are you sure you want to restore this version? This will create a new CRDT state from the chosen snapshot.")) return;
 
     sessionStorage.setItem(
-      `syncscribe-restore:${id}`,
+      `syncforge-restore:${id}`,
       JSON.stringify({
         documentId: id,
         versionId,

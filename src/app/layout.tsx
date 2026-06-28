@@ -6,7 +6,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "SyncScribe — Collaborative Document Editor",
+  title: "SyncForge — Collaborative Document Editor",
   description:
     "A local-first, collaborative document editor with offline synchronization, deterministic conflict resolution, and granular version control.",
   keywords: [
@@ -17,9 +17,9 @@ export const metadata: Metadata = {
     "real-time",
     "version control",
   ],
-  authors: [{ name: "SyncScribe" }],
+  authors: [{ name: "SyncForge" }],
   openGraph: {
-    title: "SyncScribe — Collaborative Document Editor",
+    title: "SyncForge — Collaborative Document Editor",
     description:
       "Edit documents together in real-time. Works offline. Never lose your changes.",
     type: "website",

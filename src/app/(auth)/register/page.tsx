@@ -18,7 +18,7 @@ export default function RegisterPage() {
     const result = await registerUser(formData);
 
     if (result.success) {
-      toast.success("Account created! Welcome to SyncScribe.");
+      toast.success("Account created! Welcome to SyncForge.");
       router.push("/documents");
       router.refresh();
     } else {
@@ -51,7 +51,7 @@ export default function RegisterPage() {
         </div>
         <h1 className="text-2xl font-bold gradient-text">Create Account</h1>
         <p className="text-[var(--text-secondary)] text-sm mt-1">
-          Join SyncScribe and start collaborating
+          Join SyncForge and start collaborating
         </p>
       </div>
 

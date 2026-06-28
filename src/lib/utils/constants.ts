@@ -14,7 +14,7 @@ export const WS_RECONNECT_INTERVAL_MS = 3000;
 export const WS_MAX_RECONNECT_ATTEMPTS = 50;
 
 /** Application name */
-export const APP_NAME = "SyncScribe";
+export const APP_NAME = "SyncForge";
 
 /** Document roles in order of privilege */
 export const DOCUMENT_ROLES = ["viewer", "editor", "owner"] as const;

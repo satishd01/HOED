@@ -5,14 +5,15 @@ import { useEffect, useState } from "react";
  * Uses navigator.onLine for initial state and listens to window events for changes.
  */
 export function useNetworkStatus() {
-  const [isOnline, setIsOnline] = useState(true);
+  const [isOnline, setIsOnline] = useState(() => {
+    if (typeof navigator !== "undefined") {
+      return navigator.onLine;
+    }
+    return true;
+  });
   const [wasOffline, setWasOffline] = useState(false);
 
   useEffect(() => {
-    // Sync actual status on mount to avoid hydration mismatch
-    if (typeof navigator !== "undefined") {
-      setIsOnline(navigator.onLine);
-    }
     const handleOnline = () => {
       setIsOnline(true);
       setWasOffline(true);
