@@ -13,6 +13,7 @@ interface Version {
   contentHtml?: string;
   createdAt: string;
   creator: { id: string; name: string; email: string };
+  yjsSnapshot?: string | null;
 }
 
 export default function VersionHistoryPage({
@@ -25,6 +26,15 @@ export default function VersionHistoryPage({
   const [versions, setVersions] = useState<Version[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedVersion, setSelectedVersion] = useState<Version | null>(null);
+  const [isLoadingSnapshot, setIsLoadingSnapshot] = useState(false);
+  const [VersionPreviewEditor, setVersionPreviewEditor] = useState<any>(null);
+
+  useEffect(() => {
+    // Dynamic import to avoid SSR issues with TipTap
+    import("@/features/editor/components/version-preview-editor").then((mod) => {
+      setVersionPreviewEditor(() => mod.default);
+    });
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -76,6 +86,29 @@ export default function VersionHistoryPage({
       time: date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
       relative: getRelativeTime(date),
     };
+  }
+
+  async function handleSelectVersion(version: Version) {
+    if (selectedVersion?.id === version.id) return;
+    
+    // Set basic info immediately for fast UI feedback
+    setSelectedVersion(version);
+    setIsLoadingSnapshot(true);
+    
+    try {
+      const res = await fetch(`/api/documents/${id}/versions/${version.id}`);
+      if (!res.ok) throw new Error("Failed to fetch full version");
+      const data = await res.json();
+      
+      // Update with the full data including yjsSnapshot
+      setSelectedVersion((prev) => 
+        prev?.id === version.id ? { ...prev, ...data.version } : prev
+      );
+    } catch {
+      toast.error("Failed to load full snapshot data");
+    } finally {
+      setIsLoadingSnapshot(false);
+    }
   }
 
   function getRelativeTime(date: Date) {
@@ -156,7 +189,7 @@ export default function VersionHistoryPage({
                   return (
                     <div
                       key={version.id}
-                      onClick={() => setSelectedVersion(version)}
+                      onClick={() => handleSelectVersion(version)}
                       className={`relative pl-10 cursor-pointer animate-fade-in`}
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
@@ -225,23 +258,36 @@ export default function VersionHistoryPage({
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-8">
-              <div className="max-w-3xl mx-auto">
-                {selectedVersion.contentHtml ? (
+            <div className="flex-1 overflow-y-auto p-0 flex flex-col relative bg-[var(--bg-tertiary)]">
+              {isLoadingSnapshot ? (
+                <div className="absolute inset-0 z-10 bg-[var(--bg-primary)]/50 backdrop-blur-sm flex items-center justify-center flex-col gap-3">
+                  <div className="w-8 h-8 border-2 border-[var(--color-primary-500)] border-t-transparent rounded-full animate-spin" />
+                  <p className="text-sm font-medium text-[var(--text-secondary)] animate-pulse">Loading Time Machine...</p>
+                </div>
+              ) : null}
+
+              {selectedVersion.yjsSnapshot && VersionPreviewEditor ? (
+                <VersionPreviewEditor yjsSnapshotBase64={selectedVersion.yjsSnapshot} />
+              ) : selectedVersion.contentHtml ? (
+                <div className="p-8 max-w-3xl mx-auto w-full">
                   <div
                     className="tiptap prose prose-neutral dark:prose-invert"
                     dangerouslySetInnerHTML={{ __html: selectedVersion.contentHtml }}
                   />
-                ) : selectedVersion.contentPreview ? (
+                </div>
+              ) : selectedVersion.contentPreview ? (
+                <div className="p-8 max-w-3xl mx-auto w-full">
                   <div className="text-sm text-[var(--text-primary)] whitespace-pre-wrap leading-relaxed">
                     {selectedVersion.contentPreview}
                   </div>
-                ) : (
+                </div>
+              ) : (
+                <div className="p-8 flex items-center justify-center h-full">
                   <p className="text-[var(--text-tertiary)] italic">
                     No preview available for this version
                   </p>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </>
         ) : (
