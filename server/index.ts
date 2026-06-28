@@ -1,9 +1,13 @@
-import { Server } from "@hocuspocus/server";
+import {
+  Server,
+  onAuthenticatePayload,
+  onConnectPayload,
+  onStoreDocumentPayload,
+  onLoadDocumentPayload,
+} from "@hocuspocus/server";
 import { Database } from "@hocuspocus/extension-database";
-import pg from "pg";
-import jwt from "jsonwebtoken"; // Will need jsonwebtoken package
-
-const { Pool } = pg;
+import { Pool } from "pg";
+import * as jwt from "jsonwebtoken";
 
 /**
  * Hocuspocus WebSocket Server for real-time document collaboration.
@@ -23,13 +27,10 @@ const pool = new Pool({
 
 const MAX_PAYLOAD_SIZE = 5 * 1024 * 1024; // 5MB
 
-const server = Server.configure({
+const server = new Server({
   port: parseInt(process.env.WS_PORT || "1234"),
 
-  // Maximum payload size to prevent OOM attacks
-  maxPayload: MAX_PAYLOAD_SIZE,
-
-  async onAuthenticate(data) {
+  async onAuthenticate(data: onAuthenticatePayload) {
     const { token, documentName } = data;
 
     // In production, verify JWT token here
@@ -77,19 +78,19 @@ const server = Server.configure({
     };
   },
 
-  async onConnect(data) {
+  async onConnect(data: onConnectPayload) {
     console.log(
       `[Hocuspocus] Client connected to document: ${data.documentName}`
     );
   },
 
-  async onDisconnect(data) {
+  async onDisconnect(data: any) { // using any since onDisconnectPayload might not be exported or we don't strictly need it here
     console.log(
       `[Hocuspocus] Client disconnected from document: ${data.documentName}`
     );
   },
 
-  async onStoreDocument(data) {
+  async onStoreDocument(data: onStoreDocumentPayload) {
     const { documentName, document } = data;
 
     try {
@@ -120,7 +121,7 @@ const server = Server.configure({
     }
   },
 
-  async onLoadDocument(data) {
+  async onLoadDocument(data: onLoadDocumentPayload) {
     const { documentName, document } = data;
 
     try {
