@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] overflow-hidden relative">
+    <div className="min-h-screen bg-[var(--bg-primary)] overflow-x-hidden relative">
       {/* Background Abstract Shapes */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-gradient-to-br from-[var(--color-primary-500)]/20 to-purple-500/20 rounded-full blur-[100px] animate-float pointer-events-none z-0" style={{ animationDuration: '6s' }} />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-gradient-to-tl from-purple-600/10 to-[var(--color-primary-600)]/10 rounded-full blur-[120px] animate-float pointer-events-none z-0" style={{ animationDuration: '8s', animationDelay: '2s' }} />

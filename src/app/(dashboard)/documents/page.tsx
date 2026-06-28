@@ -171,14 +171,14 @@ export default function DocumentsPage() {
             <div
               key={doc.id}
               onClick={() => router.push(`/documents/${doc.id}`)}
-              className="group p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:border-[var(--color-primary-400)]/50 cursor-pointer transition-all duration-200 hover-lift animate-fade-in"
+              className="group p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:border-[var(--color-primary-400)]/50 cursor-pointer transition-all duration-200 hover-lift animate-fade-in flex flex-col justify-between min-h-[120px]"
               style={{ animationDelay: `${index * 50}ms` }}
               role="button"
               tabIndex={0}
               id={`document-card-${doc.id}`}
             >
               {/* Icon + Title */}
-              <div className="flex items-start justify-between mb-3">
+              <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary-100)] to-purple-100 dark:from-[var(--color-primary-900)]/30 dark:to-purple-900/30 flex items-center justify-center shrink-0">
                     <svg className="w-5 h-5 text-[var(--color-primary-500)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -200,11 +200,6 @@ export default function DocumentsPage() {
                   </svg>
                 </button>
               </div>
-
-              {/* Preview */}
-              <p className="text-sm text-[var(--text-tertiary)] line-clamp-2 mb-4 min-h-[2.5rem]">
-                {doc.contentPreview || "Empty document"}
-              </p>
 
               {/* Footer */}
               <div className="flex items-center justify-between text-xs text-[var(--text-tertiary)]">

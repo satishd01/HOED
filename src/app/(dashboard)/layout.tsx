@@ -45,7 +45,7 @@ export default function DashboardLayout({
       
       {/* Conditionally render Top Navigation for Dashboard (hide in Editor) */}
       {!isEditorPage && (
-        <header className="h-[var(--header-height)] border-b border-[var(--border-color)] bg-[var(--bg-secondary)] flex items-center justify-between px-6 shrink-0 fixed top-0 w-full z-40">
+        <header className="h-16 border-b border-[var(--border-color)] bg-[var(--bg-secondary)] flex items-center justify-between px-6 shrink-0 fixed top-0 w-full z-40">
           {/* Left: Logo */}
           <Link href="/documents" className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-[var(--color-primary-500)] flex items-center justify-center shadow-sm">
@@ -85,7 +85,7 @@ export default function DashboardLayout({
       )}
 
       {/* Main content */}
-      <main className={`flex-1 flex flex-col ${!isEditorPage ? "pt-[var(--header-height)]" : ""}`}>
+      <main className={`flex-1 flex flex-col ${!isEditorPage ? "pt-16" : ""}`}>
         {children}
       </main>
     </div>

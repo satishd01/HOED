@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
@@ -161,7 +162,7 @@ export default function DocumentEditorPage({
   return (
     <div className="flex flex-col h-screen">
       {/* Docs-style Top Navigation */}
-      <header className="h-[var(--header-height)] border-b border-[var(--border-color)] bg-[var(--bg-secondary)] flex items-center justify-between px-4 shrink-0 w-full z-40">
+      <header className="h-16 border-b border-[var(--border-color)] bg-[var(--bg-secondary)] flex items-center justify-between px-4 shrink-0 w-full z-40">
         <div className="flex items-center gap-4 flex-1">
           {/* Logo (Back to dashboard) */}
           <Link href="/documents" title="Back to Documents" className="flex-shrink-0">
