@@ -84,13 +84,6 @@ export default function CollaborativeEditor({
         const data = await res.json();
         return data.token as string;
       },
-      onConnect: () => setConnectionStatus("connected"),
-      onDisconnect: () => setConnectionStatus("disconnected"),
-      onStatus: ({ status }) => {
-        setConnectionStatus(
-          status === "connected" ? "connected" : status === "connecting" ? "connecting" : "disconnected"
-        );
-      },
       onAwarenessUpdate: ({ states }) => {
         const users: Array<{ name: string; color: string }> = [];
         states.forEach((state: Record<string, unknown>) => {
@@ -418,7 +411,6 @@ export default function CollaborativeEditor({
       {/* AI Assistant Panel */}
       {showAiPanel && (
         <AiAssistant
-          documentId={documentId}
           getDocumentText={getDocumentText}
           onInsert={insertAiText}
           onClose={() => setShowAiPanel(false)}
