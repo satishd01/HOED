@@ -391,8 +391,8 @@ export default function CollaborativeEditor({
     <div className="flex h-full relative bg-[var(--bg-tertiary)] overflow-hidden">
       <div className="flex-1 flex flex-col h-full">
         {/* Toolbar & Status Row */}
-        <div className="flex items-center justify-between px-2 py-1.5 border-b border-[var(--border-color)] bg-[var(--bg-primary)] shadow-sm z-10 shrink-0">
-          <div className="flex-1 min-w-0 overflow-x-auto scrollbar-hide mr-4">
+        <div className="print:hidden flex items-center justify-between px-2 py-1.5 border-b border-[var(--border-color)] bg-[var(--bg-primary)] shadow-sm z-10 shrink-0">
+          <div className="flex-1 min-w-0 mr-4">
             {editor && !isReadOnly && <EditorToolbar editor={editor} />}
           </div>
           
@@ -480,7 +480,7 @@ export default function CollaborativeEditor({
         </div>
 
         {/* Editor canvas content */}
-        <div className="flex-1 overflow-y-auto w-full custom-scrollbar relative">
+        <div className="flex-1 overflow-y-auto w-full custom-scrollbar relative print:overflow-visible">
           {editor && !isReadOnly && (
             <BubbleMenu
               editor={editor}
@@ -520,28 +520,29 @@ export default function CollaborativeEditor({
         )}
       </div>
 
-      {/* AI Assistant Panel */}
-      {showAiPanel && (
-        <AiAssistant
-          getDocumentText={getDocumentText}
-          onInsert={insertAiText}
-          onClose={() => setShowAiPanel(false)}
-        />
-      )}
-      
-      {/* Comments Sidebar */}
-      {showComments && (
-        <CommentSidebar
-          editor={editor}
-          ydoc={ydoc}
-          currentUser={{ name: userName, color: userColor }}
-          activeCommentId={activeCommentId}
-          onClose={() => {
-            setShowComments(false);
-            setActiveCommentId(null);
-          }}
-        />
-      )}
+      {/* Sidebars */}
+      <div className="print:hidden flex shrink-0 h-full">
+        {showAiPanel && (
+          <AiAssistant
+            getDocumentText={getDocumentText}
+            onInsert={insertAiText}
+            onClose={() => setShowAiPanel(false)}
+          />
+        )}
+        
+        {showComments && (
+          <CommentSidebar
+            editor={editor}
+            ydoc={ydoc}
+            currentUser={{ name: userName, color: userColor }}
+            activeCommentId={activeCommentId}
+            onClose={() => {
+              setShowComments(false);
+              setActiveCommentId(null);
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }
