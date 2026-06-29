@@ -7,6 +7,7 @@ import { logoutUser } from "@/features/auth/actions/auth-actions";
 import { useTheme } from "@/components/providers/theme-provider";
 import { toast } from "sonner";
 import OfflineBanner from "@/components/ui/offline-banner";
+import Footer from "@/components/ui/footer";
 
 export default function DashboardLayout({
   children,
@@ -76,6 +77,8 @@ export default function DashboardLayout({
       <main className={`flex-1 flex flex-col ${!isEditorPage ? "pt-16" : ""}`}>
         {children}
       </main>
+
+      {!isEditorPage && <Footer />}
     </div>
   );
 }
