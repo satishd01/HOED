@@ -1,22 +1,71 @@
-import { useState, useEffect, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
+
+type NetworkState = {
+  isOnline: boolean;
+  wasOffline: boolean;
+};
+
+// Initial state matches the server to avoid hydration mismatch
+const initialState: NetworkState = {
+  isOnline: true,
+  wasOffline: false,
+};
+
+let currentState = initialState;
+let isInitialized = false;
+const listeners = new Set<() => void>();
+let timer: ReturnType<typeof setTimeout> | null = null;
+
+function emitChange() {
+  listeners.forEach((listener) => listener());
+}
+
+function handleOnline() {
+  currentState = { isOnline: true, wasOffline: true };
+  emitChange();
+  
+  if (timer) clearTimeout(timer);
+  timer = setTimeout(() => {
+    currentState = { ...currentState, wasOffline: false };
+    emitChange();
+  }, 4000);
+}
+
+function handleOffline() {
+  currentState = { isOnline: false, wasOffline: false };
+  emitChange();
+}
 
 function subscribe(callback: () => void) {
   if (typeof window === "undefined") return () => {};
-  window.addEventListener("online", callback);
-  window.addEventListener("offline", callback);
+
+  if (!isInitialized) {
+    currentState = { ...currentState, isOnline: navigator.onLine };
+    isInitialized = true;
+  }
+
+  if (listeners.size === 0) {
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+  }
+
+  listeners.add(callback);
+
   return () => {
-    window.removeEventListener("online", callback);
-    window.removeEventListener("offline", callback);
+    listeners.delete(callback);
+    if (listeners.size === 0) {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    }
   };
 }
 
 function getSnapshot() {
-  if (typeof navigator === "undefined") return true;
-  return navigator.onLine;
+  return currentState;
 }
 
 function getServerSnapshot() {
-  return true;
+  return initialState;
 }
 
 /**
@@ -24,20 +73,5 @@ function getServerSnapshot() {
  * Uses useSyncExternalStore to fix hydration mismatches and ESLint set-state-in-effect warnings.
  */
 export function useNetworkStatus() {
-  const isOnline = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  const [wasOffline, setWasOffline] = useState(false);
-  const [hasBeenOffline, setHasBeenOffline] = useState(false);
-
-  useEffect(() => {
-    if (!isOnline) {
-      setHasBeenOffline(true);
-    } else if (isOnline && hasBeenOffline) {
-      setWasOffline(true);
-      setHasBeenOffline(false);
-      const timer = setTimeout(() => setWasOffline(false), 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [isOnline, hasBeenOffline]);
-
-  return { isOnline, wasOffline };
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
