@@ -173,7 +173,7 @@ export default function DocumentEditorPage({
           </div>
           <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Access Denied</h1>
           <p className="text-[var(--text-secondary)] mb-8">
-            You don't have permission to view this document. You can request access from the owner.
+            You don&apos;t have permission to view this document. You can request access from the owner.
           </p>
           <div className="flex items-center gap-3 justify-center">
             <button

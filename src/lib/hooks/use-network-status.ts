@@ -1,37 +1,43 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
+
+function subscribe(callback: () => void) {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("online", callback);
+  window.addEventListener("offline", callback);
+  return () => {
+    window.removeEventListener("online", callback);
+    window.removeEventListener("offline", callback);
+  };
+}
+
+function getSnapshot() {
+  if (typeof navigator === "undefined") return true;
+  return navigator.onLine;
+}
+
+function getServerSnapshot() {
+  return true;
+}
 
 /**
  * Tracks the browser's online/offline state.
- * Uses navigator.onLine for initial state and listens to window events for changes.
+ * Uses useSyncExternalStore to fix hydration mismatches and ESLint set-state-in-effect warnings.
  */
 export function useNetworkStatus() {
-  const [isOnline, setIsOnline] = useState(true);
+  const isOnline = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const [wasOffline, setWasOffline] = useState(false);
+  const [hasBeenOffline, setHasBeenOffline] = useState(false);
 
   useEffect(() => {
-    // Set initial state correctly on the client after hydration
-    if (typeof navigator !== "undefined") {
-      setIsOnline(navigator.onLine);
-    }
-    const handleOnline = () => {
-      setIsOnline(true);
+    if (!isOnline) {
+      setHasBeenOffline(true);
+    } else if (isOnline && hasBeenOffline) {
       setWasOffline(true);
-      // Reset wasOffline after a short delay so the "back online" message shows briefly
-      setTimeout(() => setWasOffline(false), 4000);
-    };
-
-    const handleOffline = () => {
-      setIsOnline(false);
-    };
-
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
+      setHasBeenOffline(false);
+      const timer = setTimeout(() => setWasOffline(false), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [isOnline, hasBeenOffline]);
 
   return { isOnline, wasOffline };
 }
