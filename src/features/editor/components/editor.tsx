@@ -19,6 +19,7 @@ import Link from "@tiptap/extension-link";
 import { PageBreak } from "../extensions/page-break";
 import { LiveCursors } from "../extensions/live-cursors";
 import { Comment } from "../extensions/comment";
+import { SlashCommand, suggestionConfig } from "../extensions/slash-command";
 import * as Y from "yjs";
 import { Awareness } from "y-protocols/awareness";
 import { IndexeddbPersistence } from "y-indexeddb";
@@ -158,6 +159,9 @@ export default function CollaborativeEditor({
         PageBreak,
         Comment,
         LiveCursors.configure({ awareness }),
+        SlashCommand.configure({
+          suggestion: suggestionConfig,
+        }),
       ],
     },
     [documentId, isReadOnly, awareness]
@@ -324,8 +328,15 @@ export default function CollaborativeEditor({
       }
     };
 
+    const handleOpenAiPanel = () => setShowAiPanel(true);
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("open-ai-panel", handleOpenAiPanel);
+    
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("open-ai-panel", handleOpenAiPanel);
+    };
   }, [editor, isReadOnly, documentId, ydoc]);
 
   useEffect(() => {
