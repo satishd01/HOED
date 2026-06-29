@@ -495,11 +495,11 @@ export default function CollaborativeEditor({
           {editor && !isReadOnly && (
             <BubbleMenu
               editor={editor}
-              shouldShow={({ editor, state, from, to }: any) => {
+              shouldShow={({ editor: bubbleEditor, from, to }: { editor: import("@tiptap/core").Editor; from: number; to: number }) => {
                 // Only show if there's an actual selection and it's not empty
                 if (from === to) return false;
                 // Don't show if already inside a comment
-                return !editor.isActive("comment");
+                return !bubbleEditor.isActive("comment");
               }}
               className="flex overflow-hidden border border-[var(--border-color)] shadow-xl rounded-xl bg-[var(--bg-primary)] animate-scale-in"
             >

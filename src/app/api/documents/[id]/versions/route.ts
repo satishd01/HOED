@@ -22,6 +22,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
     const versions = await VersionService.getVersions(id, session.user.id);
 
     // Strip binary data from list response — only send previews, not full Yjs state
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const sanitizedVersions = versions.map(({ yjsSnapshot: _yjsSnapshot, ...rest }) => rest);
     return Response.json({ versions: sanitizedVersions });
   } catch (error) {

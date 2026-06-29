@@ -1,10 +1,12 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 
+import { Editor, Range } from "@tiptap/core";
+
 export interface CommandItem {
   title: string;
   description: string;
   icon: string | React.ReactNode;
-  command: (props: { editor: any; range: any }) => void;
+  command: (props: { editor: Editor; range: Range }) => void;
 }
 
 interface CommandListProps {

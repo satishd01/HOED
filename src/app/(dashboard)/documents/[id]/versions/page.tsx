@@ -27,7 +27,7 @@ export default function VersionHistoryPage({
   const [isLoading, setIsLoading] = useState(true);
   const [selectedVersion, setSelectedVersion] = useState<Version | null>(null);
   const [isLoadingSnapshot, setIsLoadingSnapshot] = useState(false);
-  const [VersionPreviewEditor, setVersionPreviewEditor] = useState<any>(null);
+  const [VersionPreviewEditor, setVersionPreviewEditor] = useState<React.ComponentType<{ yjsSnapshotBase64: string }> | null>(null);
 
   useEffect(() => {
     // Dynamic import to avoid SSR issues with TipTap

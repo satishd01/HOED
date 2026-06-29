@@ -1,7 +1,7 @@
 import { Mark, mergeAttributes } from "@tiptap/core";
 
 export interface CommentOptions {
-  HTMLAttributes: Record<string, any>;
+  HTMLAttributes: Record<string, unknown>;
 }
 
 declare module "@tiptap/core" {
@@ -32,8 +32,8 @@ export const Comment = Mark.create<CommentOptions>({
     return {
       commentId: {
         default: null,
-        parseHTML: (element) => element.getAttribute("data-comment-id"),
-        renderHTML: (attributes) => {
+        parseHTML: (element: HTMLElement) => element.getAttribute("data-comment-id"),
+        renderHTML: (attributes: Record<string, unknown>) => {
           if (!attributes.commentId) {
             return {};
           }
