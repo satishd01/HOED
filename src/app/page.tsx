@@ -55,18 +55,15 @@ export default async function HomePage() {
       {/* Hero Section */}
       <section className="relative pt-32 lg:pt-48 pb-20 px-6 z-10">
         <div className="max-w-5xl mx-auto text-center flex flex-col items-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--color-primary-500)]/10 border border-[var(--color-primary-500)]/20 text-sm font-medium text-[var(--color-primary-500)] mb-8 animate-fade-in shadow-inner">
-            <span className="w-2 h-2 rounded-full bg-[var(--color-primary-500)] animate-pulse shadow-[0_0_8px_var(--color-primary-500)]" />
-            Next-Gen Collaborative Editor
-          </div>
+
 
           <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight text-[var(--text-primary)]">
-            Write Together, <br />
-            <span className="text-[var(--color-primary-500)]">Beautifully Simple.</span>
+            Write and collaborate <br />
+            <span className="text-[var(--color-primary-500)]">in real-time.</span>
           </h1>
 
           <p className="text-lg md:text-2xl text-[var(--text-secondary)] max-w-3xl mx-auto mb-12 animate-fade-in leading-relaxed font-light" style={{ animationDelay: "200ms" }}>
-            A stunning, local-first document editor powered by CRDTs. Works seamlessly offline, syncs instantly online, and never loses a single keystroke.
+            A fast, offline-capable document editor. Share links, edit with your team, and never lose your work.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-in" style={{ animationDelay: "300ms" }}>
@@ -184,11 +181,11 @@ export default async function HomePage() {
       <section className="py-32 px-6 relative z-10">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-6xl font-extrabold text-[var(--text-primary)] mb-6 tracking-tight">
-              A masterclass in modern editing.
+            <h2 className="text-4xl md:text-5xl font-extrabold text-[var(--text-primary)] mb-6 tracking-tight">
+              Built for speed and reliability.
             </h2>
             <p className="text-xl text-[var(--text-secondary)] max-w-3xl mx-auto leading-relaxed">
-              Every interaction is thoughtfully designed to keep you in flow, powered by an architecture that never misses a beat.
+              Everything you need to write and collaborate, without the clutter.
             </p>
           </div>
 
