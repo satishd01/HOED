@@ -55,11 +55,17 @@ export default function DocumentEditorPage({
   const [shareEmail, setShareEmail] = useState("");
   const [shareRole, setShareRole] = useState<"editor" | "viewer">("editor");
   const [isSharing, setIsSharing] = useState(false);
+  const [hasAccess, setHasAccess] = useState(true);
+  const [isRequestingAccess, setIsRequestingAccess] = useState(false);
 
   const fetchDocument = useCallback(async () => {
     try {
       const res = await fetch(`/api/documents/${id}`);
       if (!res.ok) {
+        if (res.status === 403) {
+          setHasAccess(false);
+          return;
+        }
         if (res.status === 404) {
           toast.error("Document not found");
           router.push("/documents");
@@ -139,6 +145,61 @@ export default function DocumentEditorPage({
     } finally {
       setIsSharing(false);
     }
+  }
+
+  async function handleRequestAccess() {
+    setIsRequestingAccess(true);
+    try {
+      const res = await fetch(`/api/documents/${id}/request-access`, {
+        method: "POST",
+      });
+      if (!res.ok) throw new Error("Failed to request access");
+      toast.success("Access request sent to the document owner!");
+    } catch {
+      toast.error("Failed to send access request. Please try again.");
+    } finally {
+      setIsRequestingAccess(false);
+    }
+  }
+
+  if (!hasAccess) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[var(--bg-secondary)]">
+        <div className="text-center p-8 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl shadow-xl max-w-md w-full animate-fade-in">
+          <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Access Denied</h1>
+          <p className="text-[var(--text-secondary)] mb-8">
+            You don't have permission to view this document. You can request access from the owner.
+          </p>
+          <div className="flex items-center gap-3 justify-center">
+            <button
+              onClick={() => router.push("/documents")}
+              className="px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              Go Back
+            </button>
+            <button
+              onClick={handleRequestAccess}
+              disabled={isRequestingAccess}
+              className="px-4 py-2 rounded-lg text-sm font-medium bg-[var(--color-primary-500)] text-white hover:bg-[var(--color-primary-600)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {isRequestingAccess ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                "Request Access"
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   async function handleRemoveCollaborator(collabId: string) {

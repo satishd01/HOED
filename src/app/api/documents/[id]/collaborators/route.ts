@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth/auth";
 import { DocumentService } from "@/features/documents/services/document-service";
 import { addCollaboratorSchema } from "@/features/documents/validators/document-schema";
 import { handleApiError, UnauthorizedError } from "@/lib/utils/errors";
+import { sendInvitationEmail } from "@/lib/utils/email";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -32,6 +33,20 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       parsed.data.email,
       parsed.data.role
     );
+
+    // Send invitation email in the background
+    try {
+      const doc = await DocumentService.getDocument(id, session.user.id);
+      await sendInvitationEmail(
+        parsed.data.email,
+        doc.title,
+        session.user.name || "A user",
+        id,
+        parsed.data.role
+      );
+    } catch (e) {
+      console.error("Failed to send invitation email", e);
+    }
 
     return Response.json({ collaborator: collab }, { status: 201 });
   } catch (error) {
